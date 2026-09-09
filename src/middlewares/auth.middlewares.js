@@ -1,0 +1,35 @@
+import { User } from "../models/users.models.js";
+import { ApiError } from "../utils/api-error.js";
+import asyncHandler from "../utils/async-handler.js";
+import jwt from "jsonwebtoken";
+
+export const verifyJWT = asyncHandler(async (req, res, next) => {
+  const authHeader = req.header("Authorization");
+
+  const token =
+    req.cookies?.accessToken ||
+    (authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null);
+
+  if (!token) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    console.log("decodedToken:", decodedToken);
+
+    const user = await User.findById(decodedToken?._id).select(
+      "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
+    );
+
+    if (!user) {
+      throw new ApiError(401, "Invalid access");
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    throw new ApiError(401, "Invalid access of user");
+  }
+});
