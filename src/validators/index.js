@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-
+import { AvailableUserRole, UserRolesEnum } from "../utils/constant.js";
 const userRegistrationValidator = () => {
   return [
     body("email")
@@ -20,6 +20,7 @@ const userRegistrationValidator = () => {
     body("fullName").optional().trim(),
   ];
 };
+
 const userLoginValidator = () => {
   return [
     body("email")
@@ -31,4 +32,63 @@ const userLoginValidator = () => {
     body("password").trim().notEmpty().withMessage("password is required"),
   ];
 };
-export { userRegistrationValidator, userLoginValidator };
+
+const userChangeCurrentPasswordValidator = () => {
+  return [
+    body("oldPassword")
+      .trim()
+      .notEmpty()
+      .withMessage("old password is required"),
+    body("newPassword")
+      .trim()
+      .notEmpty()
+      .withMessage("new password is required"),
+  ];
+};
+
+const userForgotPasswordValidator = () => {
+  return [
+    body("email")
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email is invalid"),
+  ];
+};
+
+const userResetForgotPasswordValidator = () => {
+  return [body("newPassword").notEmpty().withMessage("Password is required")];
+};
+
+const createProjectValidator = () => {
+  return [
+    body("name").notEmpty().withMessage("Name is required"),
+    body("description").optional(),
+  ];
+};
+
+const addMembertoProjectValidator = () => {
+  return [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email is invalid"),
+    body("role")
+      .notEmpty()
+      .withMessage("Role is required")
+      .isIn(AvailableUserRole)
+      .withMessage("Role is invalid"),
+  ];
+};
+
+export {
+  userRegistrationValidator,
+  userLoginValidator,
+  userChangeCurrentPasswordValidator,
+  userForgotPasswordValidator,
+  userResetForgotPasswordValidator,
+  createProjectValidator,
+  addMembertoProjectValidator,
+};
